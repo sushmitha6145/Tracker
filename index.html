@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+  <title>Daily Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #4895ef;
+      --success: #4cc9f0;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #38b6ff;
+      --h3:darkblue;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    #dateDisplay {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+    
+    h2 {
+      border-bottom: 2px solid #eee;
+      padding-bottom: 8px;
+      margin: 30px 0 15px;
+      color: var(--h3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    h3 {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0px;
+        margin: 13px 0 15px;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+      }
+    
+    h2 i {
+      font-size: 1.2rem;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+    }
+    
+    h2.collapsed i {
+      transform: rotate(-90deg);
+    }
+    
+    .collapsible-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      max-height: 1000px;
+      opacity: 1;
+    }
+    
+    .collapsible-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+    
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .task {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .task.completed {
+      background-color: #f8f9fa;
+      border-left-color: var(--success);
+    }
+    
+    .task.completed label {
+      color: var(--gray);
+      text-decoration: line-through;
+    }
+    
+    .task input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      margin-right: 15px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .task input[type="checkbox"]:checked {
+      background-color: var(--success);
+      border-color: var(--success);
+    }
+    
+    .task input[type="checkbox"]:checked::after {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .task label {
+      flex: 1;
+      cursor: pointer;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    
+    .task .delete-task {
+      color: var(--gray);
+      cursor: pointer;
+      padding: 5px;
+      margin-left: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .task .delete-task:hover {
+      color: var(--danger);
+      transform: scale(1.2);
+    }
+    
+    .progress-container {
+      margin: 30px 0;
+      background: #f1f1f1;
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    
+    .progress-text {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      color: var(--gray);
+      font-weight: 500;
+    }
+    
+    .motivation, .quoteBox {
+      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 30px;
+      font-style: italic;
+      border-left: 5px solid var(--success);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .motivation p {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .motivation p i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    
+    .reset-btn, .quote-btn, .add-task-btn {
+      display: block;
+      margin: 25px auto 10px;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quote-btn {
+      background-color: var(--success);
+      color: white;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    .reset-btn {
+      background-color: var(--primary);
+      color: white;
+      width: 100%;
+      max-width: 250px;
+    }
+    
+    .add-task-btn {
+      background-color: var(--accent);
+      color: white;
+      width: 100%;
+      max-width: 250px;
+      margin: 15px auto;
+    }
+    
+    .reset-btn:hover, .quote-btn:hover, .add-task-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0.9;
+    }
+    
+    .quote-btn:hover {
+      background-color: #3ab7d8;
+    }
+    
+    .reset-btn:hover {
+      background-color: #3a56ee;
+    }
+    
+    .add-task-btn:hover {
+      background-color: #3a7bef;
+    }
+    
+    .quoteBox {
+      display: none;
+      text-align: center;
+      font-weight: 500;
+      font-size: 1.1rem;
+      color: var(--dark);
+    }
+    
+    .quoteBox i {
+      color: var(--primary);
+      margin-right: 8px;
+    }
+    
+    .add-task-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .add-task-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .add-task-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+    }
+    
+    .task-limit {
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .task-limit.reached {
+      color: var(--danger);
+      font-weight: 500;
+    }
+
+    a{
+        text-align: center; 
+        text-decoration:none; 
+        color:#3a56ee; 
+        margin-left:330px;
+        
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+
+        a{
+            text-align: center; 
+            text-decoration:none; 
+            color:#3a56ee; 
+            
+            margin-left: 300px;
+            
+        }
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .task {
+        padding: 10px 12px;
+      }
+      
+      .motivation, .quoteBox {
+        padding: 15px;
+      }
+      
+      .add-task-container {
+        flex-direction: column;
+      }
+    }
+    
+    @media (max-width: 480px) {
+        a{
+            text-align: center; 
+            text-decoration:none; 
+            color:#3a56ee; 
+            margin-left: 140px;
+            
+        }
+
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+        border-radius: 12px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      #dateDisplay {
+        font-size: 0.9rem;
+        font-style:var(--dark)
+      }
+      
+      h2 {
+        font-size: 1.1rem;
+        margin: 20px 0 10px;
+      }
+      
+      .task label {
+        font-size: 0.9rem;
+      }
+      
+      .reset-btn, .quote-btn, .add-task-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Confetti effect */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: var(--primary);
+      opacity: 0;
+      pointer-events: none;
+      animation: confetti 3s ease-in-out forwards;
+    }
+    
+    @keyframes confetti {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Checkbox sound indicator */
+    .sound-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--light);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      z-index: 100;
+    }
+    
+    .sound-indicator i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .sound-indicator.muted i.fa-volume-up {
+      display: none;
+    }
+    
+    .sound-indicator:not(.muted) i.fa-volume-mute {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-star"></i> SushuuVlogs Daily Tracker <i class="fas fa-star"></i></h1>
+    <div id="dateDisplay"></div>
+    <a href="saibaba.jpg">Baba🙏</a>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0% Complete</div>
+    
+    <h2 class="collapsible-header" data-target="dailyWorks">
+      <i class="fas fa-chevron-down"></i> <i class="fas fa-briefcase"></i> Daily Works
+    </h2>
+    <div class="collapsible-content" id="dailyWorks">
+      <div class="task-list">
+        
+        <h3>Job Goals</h3>
+        <div class="task" id="task1">
+          <input type="checkbox" id="applyJobs">
+          <label for="applyJobs">Applied to at least 2 jobs</label>
+        </div>
+        <div class="task" id="task2">
+          <input type="checkbox" id="connectHR">
+          <label for="connectHR">Connected with someone new on LinkedIn</label>
+        </div>
+        <div class="task" id="task3">
+          <input type="checkbox" id="learnSkill">
+          <label for="learnSkill">Spent 1 hour learning/revising a skill</label>
+        </div>
+        <h3>YouTube Plan - SushuuVlogs</h3>
+        <div class="task" id="task4">
+          <input type="checkbox" id="ytVideo">
+          <label for="ytVideo">Posted or prepped a YouTube video</label>
+        </div>
+        <h3>Health and Wellness</h3>
+        <div class="task" id="task5">
+          <input type="checkbox" id="walk">
+          <label for="walk">Walked 30 mins</label>
+        </div>
+        <div class="task" id="task6">
+          <input type="checkbox" id="water">
+          <label for="water">Drank 3L water</label>
+        </div>
+        <div class="task" id="task7">
+          <input type="checkbox" id="stretch">
+          <label for="stretch">Stretched or danced 10 mins</label>
+        </div>
+        <div class="task" id="task8">
+          <input type="checkbox" id="sleep">
+          <label for="sleep">Slept before 11 PM</label>
+        </div>
+      </div>
+    </div>
+    <br><br>
+    <h2 class="collapsible-header" data-target="addedWorks">
+      <i class="fas fa-chevron-down"></i> <i class="fas fa-plus-circle"></i> Added Works
+    </h2>
+    <div class="collapsible-content" id="addedWorks">
+      <div class="task-list" id="customTasksContainer"></div>
+      
+      <div class="add-task-container">
+        <input type="text" class="add-task-input" id="newTaskInput" placeholder="Add a new task...">
+        <button class="add-task-btn" onclick="addCustomTask()">
+          <i class="fas fa-plus"></i> Add Task
+        </button>
+      </div>
+      <div class="task-limit" id="taskLimit">Tasks added: 0/10</div>
+    </div>
+    
+    <div class="motivation" id="motivationQuote">
+      <p><i class="fas fa-quote-left"></i> "I am not behind, I am on my own timeline."</p>
+      <p><i class="fas fa-quote-left"></i> "Small steps every day lead to big changes."</p>
+      <p><i class="fas fa-quote-left"></i> "I'm building my dream life, one task at a time."</p>
+    </div>
+    
+    <button class="quote-btn" onclick="showMotivation()">
+      <i class="fas fa-heart"></i> Need Motivation?
+    </button>
+    <div class="quoteBox" id="extraQuote"></div>
+    
+    <button class="reset-btn" onclick="resetTasks()">
+      <i class="fas fa-sync-alt"></i> Reset for Tomorrow
+    </button>
+  </div>
+
+  <div class="sound-indicator" id="soundIndicator" title="Toggle sound">
+    <i class="fas fa-volume-up"></i>
+    <i class="fas fa-volume-mute"></i>
+  </div>
+
+  <audio id="checkSound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" preload="auto"></audio>
+  <audio id="uncheckSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" preload="auto"></audio>
+  <audio id="completeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
+
+  <script>
+    // Show date
+    const dateDisplay = document.getElementById('dateDisplay');
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateDisplay.textContent = today.toLocaleDateString('en-US', options);
+    
+    // DOM elements
+    const tasks = document.querySelectorAll('input[type="checkbox"]');
+    const taskContainers = document.querySelectorAll('.task');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const customTasksContainer = document.getElementById('customTasksContainer');
+    const newTaskInput = document.getElementById('newTaskInput');
+    const taskLimitDisplay = document.getElementById('taskLimit');
+    const soundIndicator = document.getElementById('soundIndicator');
+    const checkSound = document.getElementById('checkSound');
+    const uncheckSound = document.getElementById('uncheckSound');
+    const completeSound = document.getElementById('completeSound');
+    
+    // Sound control
+    let soundEnabled = true;
+    
+    soundIndicator.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundIndicator.classList.toggle('muted');
+      localStorage.setItem('soundEnabled', soundEnabled);
+    });
+    
+    // Play sound function
+    function playSound(sound) {
+      if (soundEnabled) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Sound playback prevented:", e));
+      }
+    }
+    
+    // Collapsible sections
+    const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+    
+    collapsibleHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const targetId = header.getAttribute('data-target');
+        const target = document.getElementById(targetId);
+        header.classList.toggle('collapsed');
+        target.classList.toggle('collapsed');
+      });
+    });
+    
+    // Custom tasks
+    let customTasks = JSON.parse(localStorage.getItem('customTasks')) || [];
+    let customTaskCount = customTasks.length;
+    
+    function updateTaskLimitDisplay() {
+      taskLimitDisplay.textContent = `Tasks added: ${customTaskCount}/10`;
+      if (customTaskCount >= 10) {
+        taskLimitDisplay.classList.add('reached');
+      } else {
+        taskLimitDisplay.classList.remove('reached');
+      }
+    }
+    
+    function renderCustomTasks() {
+      customTasksContainer.innerHTML = '';
+      customTasks.forEach((task, index) => {
+        const taskId = `custom-task-${index}`;
+        const taskElement = document.createElement('div');
+        taskElement.className = 'task';
+        taskElement.id = taskId;
+        taskElement.innerHTML = `
+          <input type="checkbox" id="${taskId}-checkbox" ${task.completed ? 'checked' : ''}>
+          <label for="${taskId}-checkbox">${task.text}</label>
+          <i class="fas fa-trash-alt delete-task" onclick="removeCustomTask(${index})"></i>
+        `;
+        customTasksContainer.appendChild(taskElement);
+        
+        // Add event listener
+        const checkbox = taskElement.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener('change', () => {
+          customTasks[index].completed = checkbox.checked;
+          localStorage.setItem('customTasks', JSON.stringify(customTasks));
+          updateProgress();
+          
+          if (checkbox.checked) {
+            playSound(checkSound);
+            taskElement.classList.add('completed');
+          } else {
+            playSound(uncheckSound);
+            taskElement.classList.remove('completed');
+          }
+        });
+        
+        // Set initial completed state
+        if (task.completed) {
+          taskElement.classList.add('completed');
+        }
+      });
+      
+      updateTaskLimitDisplay();
+    }
+    
+    function addCustomTask() {
+      const taskText = newTaskInput.value.trim();
+      if (!taskText) return;
+      
+      if (customTaskCount >= 10) {
+        alert("You can only add up to 10 tasks per day!");
+        return;
+      }
+      
+      customTasks.push({
+        text: taskText,
+        completed: false
+      });
+      
+      customTaskCount = customTasks.length;
+      localStorage.setItem('customTasks', JSON.stringify(customTasks));
+      newTaskInput.value = '';
+      renderCustomTasks();
+    }
+    
+    function removeCustomTask(index) {
+      customTasks.splice(index, 1);
+      customTaskCount = customTasks.length;
+      localStorage.setItem('customTasks', JSON.stringify(customTasks));
+      renderCustomTasks();
+    }
+    
+    // Calculate and update progress
+    function updateProgress() {
+      const defaultCompleted = document.querySelectorAll('#dailyWorks input[type="checkbox"]:checked').length;
+      const customCompleted = customTasks.filter(task => task.completed).length;
+      const totalCompleted = defaultCompleted + customCompleted;
+      const totalTasks = tasks.length + customTasks.length;
+      const percentage = Math.round((totalCompleted / totalTasks) * 100);
+      
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = `${percentage}% Complete`;
+      
+      // Change color based on progress
+      if (percentage < 30) {
+        progressBar.style.background = 'linear-gradient(90deg, var(--danger), var(--warning))';
+      } else if (percentage < 70) {
+        progressBar.style.background = 'linear-gradient(90deg, var(--warning), var(--info))';
+      } else {
+        progressBar.style.background = 'linear-gradient(90deg, var(--primary), var(--success))';
+      }
+      
+      // Celebrate when all tasks are completed
+      if (totalCompleted === totalTasks && totalTasks > 0) {
+        celebrateCompletion();
+      }
+    }
+    
+    // Celebrate when all tasks are done
+    function celebrateCompletion() {
+      // Create confetti
+      for (let i = 0; i < 50; i++) {
+        createConfetti();
+      }
+      
+      // Play completion sound
+      playSound(completeSound);
+      
+      // Show congratulatory message
+      const quoteBox = document.getElementById('extraQuote');
+      quoteBox.innerHTML = '<i class="fas fa-trophy"></i> Amazing! You completed all your tasks today!';
+      quoteBox.style.display = 'block';
+      quoteBox.classList.add('fade-in');
+    }
+    
+    // Create confetti particles
+    function createConfetti() {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      
+      // Random properties
+      const colors = ['#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585', '#f8961e'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const randomSize = Math.random() * 10 + 5;
+      const randomLeft = Math.random() * window.innerWidth;
+      const randomDelay = Math.random() * 2;
+      
+      confetti.style.left = `${randomLeft}px`;
+      confetti.style.width = `${randomSize}px`;
+      confetti.style.height = `${randomSize}px`;
+      confetti.style.backgroundColor = randomColor;
+      confetti.style.animationDelay = `${randomDelay}s`;
+      
+      document.body.appendChild(confetti);
+      
+      // Remove confetti after animation
+      setTimeout(() => {
+        confetti.remove();
+      }, 3000);
+    }
+    
+    // Initialize tasks and event listeners
+    window.onload = () => {
+      // Load sound preference
+      soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+      if (!soundEnabled) {
+        soundIndicator.classList.add('muted');
+      }
+      
+      // Load default tasks
+      tasks.forEach((task, index) => {
+        // Load saved state
+        task.checked = localStorage.getItem(task.id) === 'true';
+        if (task.checked) {
+          taskContainers[index].classList.add('completed');
+        }
+        
+        // Add change event
+        task.addEventListener('change', () => {
+          localStorage.setItem(task.id, task.checked);
+          taskContainers[index].classList.toggle('completed');
+          updateProgress();
+          
+          if (task.checked) {
+            playSound(checkSound);
+          } else {
+            playSound(uncheckSound);
+          }
+        });
+      });
+      
+      // Load custom tasks
+      renderCustomTasks();
+      
+      // Initial progress update
+      updateProgress();
+      
+      // Welcome message
+      setTimeout(() => {
+        const welcomeMsg = document.createElement('div');
+        welcomeMsg.className = 'quoteBox fade-in';
+        welcomeMsg.innerHTML = '<i class="fas fa-smile"></i> Welcome back! Ready to make today great?';
+        welcomeMsg.style.display = 'block';
+        document.querySelector('.motivation').after(welcomeMsg);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+          welcomeMsg.style.opacity = '0';
+          setTimeout(() => welcomeMsg.remove(), 500);
+        }, 3000);
+      }, 500);
+      
+      // Add task on Enter key
+      newTaskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          addCustomTask();
+        }
+      });
+    };
+    
+    // Reset all tasks
+    function resetTasks() {
+      // Reset default tasks
+      tasks.forEach((task, index) => {
+        task.checked = false;
+        localStorage.setItem(task.id, false);
+        taskContainers[index].classList.remove('completed');
+      });
+      
+      // Reset custom tasks
+      customTasks = [];
+      customTaskCount = 0;
+      localStorage.setItem('customTasks', JSON.stringify(customTasks));
+      renderCustomTasks();
+      
+      updateProgress();
+      
+      // Show reset confirmation
+      const confirmation = document.createElement('div');
+      confirmation.className = 'quoteBox fade-in';
+      confirmation.innerHTML = '<i class="fas fa-check-circle"></i> All tasks reset for a fresh start tomorrow!';
+      confirmation.style.display = 'block';
+      document.querySelector('.motivation').after(confirmation);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        confirmation.style.opacity = '0';
+        setTimeout(() => confirmation.remove(), 500);
+      }, 3000);
+    }
+    
+    // Motivational quotes
+    const extraQuotes = [
+    "You're doing better than you think <i class='fas fa-fist-raised'></i>",
+    "Progress is progress, no matter how small <i class='fas fa-seedling'></i>",
+    "Take a breath. You've got this <i class='fas fa-rainbow'></i>",
+    "Even slow steps take you forward <i class='fas fa-walking'></i>",
+    "Success is built on consistent effort <i class='fas fa-lightbulb'></i>",
+    "Every expert was once a beginner <i class='fas fa-graduation-cap'></i>",
+    "You grow through what you go through <i class='fas fa-mountain'></i>",
+    "Dream big, start small, act now <i class='fas fa-rocket'></i>",
+    "Discipline beats motivation <i class='fas fa-stopwatch'></i>",
+    "The only way is through <i class='fas fa-arrow-right'></i>",
+    "Your only limit is your mind <i class='fas fa-brain'></i>",
+    "Be stronger than your excuses <i class='fas fa-dumbbell'></i>",
+    "You are your only competition <i class='fas fa-user-alt'></i>",
+    "Consistency creates miracles <i class='fas fa-magic'></i>",
+    "Focus on progress, not perfection <i class='fas fa-chart-line'></i>",
+    "It’s okay to rest, not to quit <i class='fas fa-bed'></i>",
+    "Believe in your grind <i class='fas fa-tools'></i>",
+    "Small wins lead to big victories <i class='fas fa-trophy'></i>",
+    "Trust the process <i class='fas fa-cogs'></i>",
+    "Hustle until your haters ask if you're hiring <i class='fas fa-fire'></i>",
+    "Mindset is everything <i class='fas fa-infinity'></i>",
+    "Start where you are, use what you have <i class='fas fa-box-open'></i>",
+    "Don't be afraid to fail <i class='fas fa-times-circle'></i>",
+    "Rest, reflect, restart <i class='fas fa-redo-alt'></i>",
+    "Keep going. You’re almost there <i class='fas fa-road'></i>",
+    "Discomfort means growth <i class='fas fa-expand-arrows-alt'></i>",
+    "Your dreams don’t work unless you do <i class='fas fa-briefcase'></i>",
+    "You can do hard things <i class='fas fa-mountain'></i>",
+    "Never underestimate yourself <i class='fas fa-star'></i>",
+    "Push through the hard days <i class='fas fa-heartbeat'></i>",
+    "Failure is not the opposite of success—it’s part of it <i class='fas fa-sync'></i>",
+    "One day or day one. You decide <i class='fas fa-calendar-day'></i>",
+    "Work hard in silence, let success make the noise <i class='fas fa-volume-up'></i>",
+    "Be proud of how far you've come <i class='fas fa-award'></i>",
+    "Done is better than perfect <i class='fas fa-check-circle'></i>",
+    "You’re capable of more than you know <i class='fas fa-rocket'></i>",
+    "Your future is created by what you do today <i class='fas fa-calendar-check'></i>",
+    "Energy flows where attention goes <i class='fas fa-bolt'></i>",
+    "Take action. One step at a time <i class='fas fa-shoe-prints'></i>",
+    "Never stop learning <i class='fas fa-book-reader'></i>",
+    "You got this, even if it’s hard <i class='fas fa-fire-alt'></i>",
+    "Don’t let fear stop you <i class='fas fa-shield-alt'></i>",
+    "Confidence is a habit too <i class='fas fa-user-shield'></i>",
+    "Make yourself proud <i class='fas fa-smile-beam'></i>",
+    "Let your hustle be louder than your doubts <i class='fas fa-volume-up'></i>",
+    "A little progress each day adds up <i class='fas fa-plus-square'></i>",
+    "You are not alone in this journey <i class='fas fa-hands-helping'></i>",
+    "Be the energy you want to attract <i class='fas fa-magnet'></i>",
+    "Stay focused and never give up <i class='fas fa-eye'></i>",
+    "Prove them wrong <i class='fas fa-thumbs-up'></i>",
+    "Build the life you can't wait to wake up to <i class='fas fa-sun'></i>"
+  ];
+  
+    
+    function showMotivation() {
+      const quoteBox = document.getElementById('extraQuote');
+      const random = extraQuotes[Math.floor(Math.random() * extraQuotes.length)];
+      quoteBox.innerHTML = '<i class="fas fa-magic"></i> ' + random;
+      quoteBox.style.display = 'block';
+      quoteBox.classList.add('fade-in');
+    }
+  </script>
+</body>
+</html>
